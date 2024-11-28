@@ -25,7 +25,7 @@ redis = Redis()
 async def token_generator(name: str, request: Request):
     token = str(uuid.uuid4())
 
-    if name == "":
+    if name == "":              
         raise HTTPException(status_code=400, detail={
             "loc": "name",  "msg": "Enter a valid name"})
 
@@ -37,16 +37,16 @@ async def token_generator(name: str, request: Request):
         name=name
     )
 
-    print(chat_session.dict())
+    print(chat_session.model_dump())
 
     # Store chat session in redis JSON with the token as key
-    json_client.jsonset(str(token), Path.rootPath(), chat_session.dict())
+    json_client.jsonset(str(token), Path.rootPath(), chat_session.model_dump())
 
     # Set a timeout for redis data
     redis_client = await redis.create_connection()
     await redis_client.expire(str(token), 3600)
 
-    return chat_session.dict()
+    return chat_session.model_dump()
 
 
 # @route   POST /refresh_token

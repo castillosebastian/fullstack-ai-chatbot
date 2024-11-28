@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+gunicorn
+websockets
+python-dotenv
+aioredis
+uuid
+rejson
+requests

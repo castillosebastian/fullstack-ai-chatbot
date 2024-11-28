@@ -5,13 +5,13 @@ import uuid
 
 
 class Message(BaseModel):
-    id = uuid.uuid4()
+    id: uuid.UUID = uuid.uuid4()
     msg: str
-    timestamp = str(datetime.now())
+    timestamp: str = str(datetime.now())
 
 
 class Chat(BaseModel):
     token: str
     messages: List[Message]
     name: str
-    session_start = str(datetime.now())
+    session_start: str = str(datetime.now())
