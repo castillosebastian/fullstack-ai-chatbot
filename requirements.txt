@@ -9,3 +9,4 @@ uuid
 rejson
 requests
 openai
+streamlit

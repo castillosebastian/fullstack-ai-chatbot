@@ -12,7 +12,10 @@ load_dotenv()
 api = FastAPI()
 api.include_router(chat)
 
-origins = ["http://localhost:3000"]
+origins = [
+    "http://localhost:3000",
+    "http://localhost:8501"
+]
 api.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -24,7 +27,7 @@ api.add_middleware(
 
 @api.get("/test")
 async def root():
-    return {'msg": "API is Online'}
+    return {"msg": "API is Online"}
 
 
 if __name__ == "__main__":
