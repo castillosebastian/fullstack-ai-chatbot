@@ -2,43 +2,62 @@ import os
 from dotenv import load_dotenv
 import requests
 import json
+from datetime import datetime
+
+# from pathlib import Path
+# import sys
+# project_root = str(Path(__file__).parents[3])  # Go up 3 levels to reach project root
+# sys.path.append(project_root)
+# from server.src.redis.config import Redis
+# from server.src.schema.chat import Message
+
+# Comment out these imports when running as standalone
 from ..redis.config import Redis
+from ..redis.producer import Producer
 from ..schema.chat import Message
 
+
+from openai import AzureOpenAI
 
 load_dotenv()
 redis = Redis()
 
-
 class GPT:
     def __init__(self):
-        self.url = os.environ.get('MODEL_URL')
-        self.headers = {
-            "Authorization": f"Bearer {os.environ.get('HUGGINFACE_INFERENCE_TOKEN')}"}
-        self.payload = {
-            "inputs": "",
-            "parameters": {
-                "return_full_text": False,
-                "use_cache": False,
-                "max_new_tokens": 25
-            }
-
-        }
+        self.client = AzureOpenAI(
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+        )
+        self.deployment_name = os.getenv("AZURE_OPENAI_LLM_DEPLOYMENT")
         self.json_client = redis.create_rejson_connection()
-        redis_client = redis.create_connection()
-        self.producer = Producer(redis_client)
 
-    def query(self, input: str) -> list:
-        self.payload["inputs"] = f"{input} Bot:"
-        data = json.dumps(self.payload)
-        response = requests.request(
-            "POST", self.url, headers=self.headers, data=data)
-        data = json.loads(response.content.decode("utf-8"))
-        print(data)
+    async def initialize(self):
+        self.redis_client = await redis.create_connection()
+        self.producer = Producer(self.redis_client)
+        return self
 
-        text = data[0]['generated_text']
+    async def query(self, input: str) -> str:
+        try:
+            response = self.client.chat.completions.create(
+                model=self.deployment_name,
+                messages=[
+                    {"role": "user", "content": f"{input} Bot:"}
+                ],
+                max_tokens=250,
+                temperature=0.7,
+            )
+            generated_text = response.choices[0].message.content
+            res = str(generated_text.split("Human:")[0]).strip("\n").strip()
+            
+            return res
 
-        res = str(text.split("Human:")[0]).strip("\n").strip()
-        print(res)
+        except Exception as e:
+            print(f"Error in query: {str(e)}")
+            raise
 
-        return res
+# Add test code to run when file is executed directly
+if __name__ == "__main__":
+    gpt = GPT()
+    response = gpt.query("Hello, what can you do for me?")
+    print("Response:", response)

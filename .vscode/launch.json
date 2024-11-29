@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: FastAPI Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/server/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "APP_ENV": "development"
+            }
+        },
+        {
+            "name": "Python: Worker",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/worker/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Python: Debug All",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "compounds": [
+                {
+                    "name": "Server/Worker",
+                    "configurations": ["Python: FastAPI Server", "Python: Worker"]
+                }
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Server/Worker",
+            "configurations": ["Python: FastAPI Server", "Python: Worker"]
+        }
+    ]
+} 

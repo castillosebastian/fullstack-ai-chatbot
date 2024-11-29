@@ -12,6 +12,10 @@ class Cache:
         return data
 
     async def add_message_to_cache(self, token: str, source: str, message_data: dict):
+        if not self.json_client.exists(str(token)):
+            self.json_client.jsonset(str(token), Path.rootPath(), {"messages": []})
+
+            
         if source == "human":
             message_data['msg'] = "Human: " + (message_data['msg'])
         elif source == "bot":
